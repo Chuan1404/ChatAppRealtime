@@ -11,6 +11,8 @@ const ChatBoard = ({ chatRoomId = null }) => {
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
+  const chatRef = useRef()
+
   const handleChat = async () => {
     let content = inputRef.current.value;
 
@@ -19,17 +21,24 @@ const ChatBoard = ({ chatRoomId = null }) => {
         chatRoomId,
         senderId: user._id,
         content,
-        createdAt: new Date()
+        createdAt: new Date(),
+        senderObject: {
+          avatar: user.avatar
+        }
       }
       socket.emit("SEND_MESSAGE", data)
       setMessages([...messages, data])
-      let response = await chatService.createChat(data);
-
       inputRef.current.value = "";
+      await chatService.createChat(data);
+
     }
   };
 
-  
+  const onEnter = (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      handleChat()
+  }
+  }
 
   useEffect(() => {
     async function fetchMessage() {
@@ -63,8 +72,8 @@ const ChatBoard = ({ chatRoomId = null }) => {
   }, [socket]);
 
   useEffect(() => {
-    
-    
+    let height = chatRef.current.scrollHeight
+    chatRef.current.scrollTop = height
   }, [messages]);
   return (
     <>
@@ -75,6 +84,7 @@ const ChatBoard = ({ chatRoomId = null }) => {
           overflow: "scroll",
         }}
         className="pt-3 pe-3"
+        ref={chatRef}
       >
         {isFetching
           ? "...loading"
@@ -98,6 +108,7 @@ const ChatBoard = ({ chatRoomId = null }) => {
           id="exampleFormControlInput2"
           placeholder="Type message"
           ref={inputRef}
+          onKeyDown={onEnter} 
         />
         <a className="ms-1 text-muted" href="#!">
           <MDBIcon fas icon="paperclip" />
