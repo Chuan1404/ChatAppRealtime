@@ -4,17 +4,22 @@ const ChatMessageModel = require("../models/ChatMessageModel");
 class ChatController {
   // [POST] /chat/create-room
   async createRoom(req, res) {
-    const members = req.body.members ? req.body.members : [];
-    const memberslength = members.length;
-    const type = req.body.type;
+    const body = req.body
+
+    body.members = req.body.members ? JSON.parse(req.body.members) : [];
+
+    if (req.file) {
+      req.body.image = "images/" + req.file.filename;
+    }
+
     // room between 2 people
-    if (type == 1) {
+    if (body.type == 1) {
       let room = await ChatRoomModel.findOne({
-        members: { $all: members, $size: memberslength },
+        members: { $all: body.members, $size: body.members.length },
       });
 
       if (!room) {
-        room = await ChatRoomModel.create(req.body);
+        room = await ChatRoomModel.create(body);
       }
 
       return res.status(200).json({
@@ -23,8 +28,9 @@ class ChatController {
     }
 
     // room among many people
-    else if (type == 2) {
-      let room = await ChatRoomModel.create(req.body);
+    else if (body.type == 2) {
+
+      let room = await ChatRoomModel.create(body);
 
       return res.status(200).json({
         data: room,

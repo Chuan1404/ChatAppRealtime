@@ -43,12 +43,12 @@ function SignUp() {
       formValue.password == "" ||
       file == null
     ) {
-      alert("Some fields are required");
+      alert("Trường bắt buộc nhập chưa có giá trị");
       return;
     }
 
     if (formValue.password != formValue.confirmPassword) {
-      alert("Passwords do not match");
+      alert("Mật khẩu không trùng khớp");
       return;
     }
 

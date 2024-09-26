@@ -12,12 +12,8 @@ import {
   MDBTypography,
 } from "mdb-react-ui-kit";
 
-import React, {
-  useContext,
-  useEffect,
-  useState
-} from "react";
-import { ChatBoard, Nav, RoomBox, UserBox } from "../components";
+import React, { useContext, useEffect, useState } from "react";
+import { AddGroupPopup, ChatBoard, Nav, RoomBox, UserBox } from "../components";
 import { socket } from "../config/socket";
 import { AuthContext } from "../context/AuthProvider";
 import chatService from "../services/chatService";
@@ -27,7 +23,7 @@ export default function Dashboard() {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [userList, setUserList] = useState([]);
   const [roomList, setRoomList] = useState([]);
-
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
 
   const [roomId, setRoomId] = useState(null);
@@ -43,12 +39,17 @@ export default function Dashboard() {
   };
 
   const handleUserClick = async (receiver) => {
+    let formData = new FormData();
     let body = {
-      members: [user._id, receiver._id],
+      members: JSON.stringify([user._id, receiver._id]),
       type: 1,
     };
 
-    let response = await chatService.createRoom(body);
+    for (var key in body) {
+      formData.append(key, body[key]);
+    }
+
+    let response = await chatService.createRoom(formData);
 
     if (!response.error) {
       setRoomId(response.data._id);
@@ -57,8 +58,12 @@ export default function Dashboard() {
   };
 
   const handleOpenChat = (chatRoomId) => {
-    socket.emit("JOIN_ROOM", chatRoomId)
+    socket.emit("JOIN_ROOM", chatRoomId);
     setRoomId(chatRoomId);
+  };
+
+  const handleAddRoom = (room) => {
+    setRoomList([...roomList, room]);
   };
 
   useEffect(() => {
@@ -146,7 +151,7 @@ export default function Dashboard() {
                         <MDBTypography listUnStyled className="mb-0">
                           {isFetching ? (
                             "...loading"
-                          ) : roomList && roomList.length > 0 ? (
+                          ) : (roomList && roomList.length > 0) ? (
                             roomList.map((room) => (
                               <RoomBox
                                 key={"room" + room._id}
@@ -155,10 +160,12 @@ export default function Dashboard() {
                               />
                             ))
                           ) : (
-                            <div style={{marginTop: 40}}>
-                              Chọn người để chat ở "Danh sách người dùng"
+                            <div className="my-4">
+                              Chọn người để chat ở "Danh sách người dùng" hoặc thêm nhóm chat mới
                             </div>
                           )}
+
+                          <AddGroupPopup handleAddRoom={handleAddRoom} />
                         </MDBTypography>
                       </MDBTabsPane>
                       <MDBTabsPane open={tab === "tab2"}>

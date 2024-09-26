@@ -5,8 +5,7 @@ const authService = {
     return fetch(`${API}/auth/sign-up`, {
       method: "POST",
       headers: {
-        // Note: Do not set 'Content-Type' header when sending FormData
-        // It will be automatically set by the browser to "multipart/form-data"
+        
       },
       body:formData,
     }).then((res) => res.json());

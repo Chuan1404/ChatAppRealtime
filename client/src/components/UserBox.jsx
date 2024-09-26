@@ -1,4 +1,3 @@
-import { MDBBtn, MDBTypography } from "mdb-react-ui-kit";
 import { API } from "../constants";
 
 const UserBox = ({ user = null, setId = () => {} }) => {

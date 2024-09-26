@@ -2,10 +2,13 @@ import { API } from "../constants";
 import callApiWithToken from "../utils/callApiWithToken";
 
 const chatService = {
-  createRoom(data) {
+  createRoom(formData) {
     return callApiWithToken(`${API}/chat/create-room`, {
-        method: 'POST',
-        body: JSON.stringify(data)
+      method: "POST",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      body: formData,
     });
   },
 
@@ -15,8 +18,8 @@ const chatService = {
 
   createChat(data) {
     return callApiWithToken(`${API}/chat/create-chat`, {
-        method: 'POST',
-        body: JSON.stringify(data)
+      method: "POST",
+      body: JSON.stringify(data),
     });
   },
 

@@ -5,11 +5,15 @@ const callApiWithToken = async (url, options = {}) => {
   options = {
     ...options,
     headers: {
-      ...options.headers,
       "Content-Type": "application/json",
       Authorization: `Bearer ${token.accessToken}`,
+      ...options.headers,
     },
   };
+
+  if(options.headers['Content-Type'] == "multipart/form-data")
+    delete options.headers['Content-Type']
+
   let res = await fetch(url, options);
   if (res.status == 401) {
     const refreshToken = await authService.refreshToken();
@@ -20,10 +24,14 @@ const callApiWithToken = async (url, options = {}) => {
       options = {
         ...options,
         headers: {
-          ...options.headers,
           Authorization: `Bearer ${token.accessToken}`,
+          ...options.headers,
+
         },
       };
+
+      if(options.headers['Content-Type'] == "multipart/form-data")
+        delete options.headers['Content-Type']
       res = await fetch(url, options);
     } else {
       return {
