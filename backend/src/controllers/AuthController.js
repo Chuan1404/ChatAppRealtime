@@ -7,7 +7,10 @@ class AuthController {
   // [POST] /auth/register
   async signUp(req, res) {
     const body = req.body;
-    body.avatar = "images/" + req.file.filename;
+
+    if (req.file) {
+      body.avatar = "images/" + req.file.filename;
+    }
     const existedUser = await UserModel.findOne({ email: body.email });
 
     if (existedUser) {
@@ -119,9 +122,9 @@ class AuthController {
       tokenModel.token,
       process.env.REFRESH_TOKEN_SECRET,
       async (err, data) => {
-        console.log(err)
+        console.log(err);
         if (err) {
-          await TokenModel.deleteOne({ token })
+          await TokenModel.deleteOne({ token });
 
           return res.status(401).json({
             error: "UnAuthorized",

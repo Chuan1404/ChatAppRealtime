@@ -14,7 +14,7 @@ import authService from "../services/AuthService";
 import { useNavigate } from "react-router-dom";
 
 function SignUp() {
-  const navaigator = useNavigate()
+  const navaigator = useNavigate();
   const [formValue, setFormValue] = useState({
     email: "",
     password: "",
@@ -37,6 +37,21 @@ function SignUp() {
   const handleSubmit = async () => {
     let formData = new FormData();
 
+    if (
+      formValue.email == "" ||
+      formValue.name == "" ||
+      formValue.password == "" ||
+      file == null
+    ) {
+      alert("Some fields are required");
+      return;
+    }
+
+    if (formValue.password != formValue.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
     for (var key in formValue) {
       formData.append(key, formValue[key]);
     }
@@ -46,12 +61,11 @@ function SignUp() {
     }
     const response = await authService.signUp(formData);
 
-    if(!response.error) {
-      localStorage.setItem('token', JSON.stringify(response.data))
-      return navaigator('/')
-    }
-    else {
-      alert(response.error)
+    if (!response.error) {
+      localStorage.setItem("token", JSON.stringify(response.data));
+      return navaigator("/");
+    } else {
+      alert(response.error);
     }
   };
 

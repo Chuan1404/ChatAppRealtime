@@ -10,7 +10,7 @@ const MessageBox = ({ isSameUser = false, message = {} }) => {
       {!isSameUser && (
         <img
           src={`${API}/${message?.senderObject?.avatar}`}
-          alt="avatar 1"
+          alt="avatar"
           style={{ width: "45px", height: "45px", borderRadius: '50%', marginRight: 5 }}
         />
       )}

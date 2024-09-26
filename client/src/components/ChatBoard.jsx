@@ -54,7 +54,7 @@ const ChatBoard = ({ chatRoomId = null }) => {
     }
 
     fetchMessage();
-  }, []);
+  }, [chatRoomId]);
 
   useEffect(() => {
     function handleReceiveMessage(data) {
@@ -75,6 +75,7 @@ const ChatBoard = ({ chatRoomId = null }) => {
     let height = chatRef.current.scrollHeight
     chatRef.current.scrollTop = height
   }, [messages]);
+
   return (
     <>
       <div

@@ -15,16 +15,13 @@ import {
 import React, {
   useContext,
   useEffect,
-  useReducer,
-  useRef,
-  useState,
+  useState
 } from "react";
 import { ChatBoard, Nav, RoomBox, UserBox } from "../components";
-import ChatBox from "../components/UserBox";
 import { socket } from "../config/socket";
 import { AuthContext } from "../context/AuthProvider";
-import userService from "../services/userService";
 import chatService from "../services/chatService";
+import userService from "../services/userService";
 
 export default function Dashboard() {
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -48,7 +45,7 @@ export default function Dashboard() {
   const handleUserClick = async (receiver) => {
     let body = {
       members: [user._id, receiver._id],
-      type: 1
+      type: 1,
     };
 
     let response = await chatService.createRoom(body);
@@ -60,6 +57,7 @@ export default function Dashboard() {
   };
 
   const handleOpenChat = (chatRoomId) => {
+    socket.emit("JOIN_ROOM", chatRoomId)
     setRoomId(chatRoomId);
   };
 
@@ -71,19 +69,6 @@ export default function Dashboard() {
       socket.disconnect();
     };
   }, []);
-
-  useEffect(() => {
-    function userAdded(data) {
-      setOnlineUsers(data);
-    }
-    socket.emit("ADD_USER", user);
-
-    socket.on("USER_ADDED", userAdded);
-
-    return () => {
-      socket.off("USER_ADDED", userAdded);
-    };
-  }, [socket, user]);
 
   // fetch user & room list
   useEffect(() => {
@@ -112,7 +97,6 @@ export default function Dashboard() {
         setIsFetching(false);
       }
     }
-
     if (tab == "tab2") fetchUserList();
     if (tab == "tab1") fetchRoomList();
   }, [tab]);
@@ -160,15 +144,21 @@ export default function Dashboard() {
                     <MDBTabsContent>
                       <MDBTabsPane open={tab === "tab1"}>
                         <MDBTypography listUnStyled className="mb-0">
-                          {isFetching
-                            ? "...loading"
-                            : roomList?.map((room) => (
-                                <RoomBox
-                                  key={"room" + room._id}
-                                  room={room}
-                                  setId={handleOpenChat}
-                                />
-                              ))}
+                          {isFetching ? (
+                            "...loading"
+                          ) : roomList && roomList.length > 0 ? (
+                            roomList.map((room) => (
+                              <RoomBox
+                                key={"room" + room._id}
+                                room={room}
+                                setId={handleOpenChat}
+                              />
+                            ))
+                          ) : (
+                            <div style={{marginTop: 40}}>
+                              Chọn người để chat ở "Danh sách người dùng"
+                            </div>
+                          )}
                         </MDBTypography>
                       </MDBTabsPane>
                       <MDBTabsPane open={tab === "tab2"}>
