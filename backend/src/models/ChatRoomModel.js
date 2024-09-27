@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ROOM_TYPE } = require("../../../client/src/constants");
+const { ROOM_TYPE } = require("../common/constants");
 const { Schema } = mongoose;
 
 const chatRoomSchema = new Schema(
