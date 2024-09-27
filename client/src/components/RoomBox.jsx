@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { API } from "../constants";
+import { API, ROOM_TYPE } from "../constants";
 import { AuthContext } from "../context/AuthProvider";
 
 const RoomBox = ({ room = null, setId = () => {} }) => {
@@ -7,7 +7,7 @@ const RoomBox = ({ room = null, setId = () => {} }) => {
   const { user } = useContext(AuthContext);
   useEffect(() => {
     // personal room
-    if (room.type == 1) {
+    if (room.type == ROOM_TYPE.PERSIONAL) {
       let m = room.members.find((item) => item._id != user._id);
       setReceiver(m);
     }
@@ -27,7 +27,7 @@ const RoomBox = ({ room = null, setId = () => {} }) => {
           <div className="d-flex flex-row" style={{ alignItems: "center" }}>
             <img
               src={
-                room.type == 1
+                room.type == ROOM_TYPE.PERSIONAL
                   ? `${API}/${receiver?.avatar}`
                   : `${API}/${room.image}`
               }
@@ -38,7 +38,7 @@ const RoomBox = ({ room = null, setId = () => {} }) => {
             />
             <div className="pt-1">
               <p className="fw-bold mb-0">
-                {room.type == 1 ? receiver?.name : room.name}
+                {room.type == ROOM_TYPE.PERSIONAL ? receiver?.name : room.name}
               </p>
             </div>
           </div>

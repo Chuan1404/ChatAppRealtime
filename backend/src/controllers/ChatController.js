@@ -1,5 +1,6 @@
 const ChatRoomModel = require("../models/ChatRoomModel");
 const ChatMessageModel = require("../models/ChatMessageModel");
+const { ROOM_TYPE } = require("../common/constants");
 
 class ChatController {
   // [POST] /chat/create-room
@@ -13,7 +14,7 @@ class ChatController {
     }
 
     // room between 2 people
-    if (body.type == 1) {
+    if (body.type == ROOM_TYPE.PERSIONAL) {
       let room = await ChatRoomModel.findOne({
         members: { $all: body.members, $size: body.members.length },
       });
@@ -28,7 +29,7 @@ class ChatController {
     }
 
     // room among many people
-    else if (body.type == 2) {
+    else if (body.type == ROOM_TYPE.GROUP) {
 
       let room = await ChatRoomModel.create(body);
 
