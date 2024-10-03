@@ -102,7 +102,7 @@ export default function Dashboard() {
         setIsFetching(false);
       }
     }
-    if (tab == "tab2") fetchUserList();
+    if (tab == "tab3") fetchUserList();
     if (tab == "tab1") fetchRoomList();
   }, [tab]);
 
@@ -138,8 +138,8 @@ export default function Dashboard() {
                       </MDBTabsItem>
                       <MDBTabsItem>
                         <MDBTabsLink
-                          onClick={() => handleTabClick("tab2")}
-                          active={tab === "tab2"}
+                          onClick={() => handleTabClick("tab3")}
+                          active={tab === "tab3"}
                         >
                           Danh sách người dùng
                         </MDBTabsLink>
@@ -169,6 +169,11 @@ export default function Dashboard() {
                         </MDBTypography>
                       </MDBTabsPane>
                       <MDBTabsPane open={tab === "tab2"}>
+                        <MDBTypography listUnStyled className="mb-0">
+
+                        </MDBTypography>
+                      </MDBTabsPane>
+                      <MDBTabsPane open={tab === "tab3"}>
                         <MDBTypography listUnStyled className="mb-0">
                           {isFetching
                             ? "...loading"
