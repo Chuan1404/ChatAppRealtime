@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 // [POST] /auth/register
-async function signUp(req: Request, res: Response): Promise<any> {
+async function signUp(req: Request, res: Response): Promise<void> {
   const body = req.body;
 
   if (req.file) {
@@ -14,9 +14,10 @@ async function signUp(req: Request, res: Response): Promise<any> {
   const existedUser = await UserModel.findOne({ email: body.email });
 
   if (existedUser) {
-    return res.status(409).json({
+    res.status(409).json({
       error: "Account already exists",
     });
+    return;
   } else {
     const hashPassword = bcrypt.hashSync(body.password, 10);
     const model = new UserModel(req.body);
@@ -24,10 +25,11 @@ async function signUp(req: Request, res: Response): Promise<any> {
 
     let savedUser = await model.save();
     if (!savedUser) {
-      return res.status(400).json({
+      res.status(400).json({
         status: 400,
         error: "Create user fail!",
       });
+      return;
     }
 
     const payload = {
@@ -41,7 +43,8 @@ async function signUp(req: Request, res: Response): Promise<any> {
     const refreshTokenSecret: string = process.env.REFRESH_TOKEN_SECRET || "";
 
     if (!accessTokenSecret || !refreshTokenSecret) {
-      return res.status(500).json({ error: "Server configuration error." });
+      res.status(500).json({ error: "Server configuration error." });
+      return;
     }
 
     let accessToken = jwt.sign(payload, accessTokenSecret, {
@@ -55,36 +58,40 @@ async function signUp(req: Request, res: Response): Promise<any> {
       token: refreshToken,
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       data: {
         accessToken,
         refreshToken,
       },
     });
+    return;
   }
 }
 
 // [POST] /auth/sign-in
-async function signIn(req: Request, res: Response): Promise<any> {
+async function signIn(req: Request, res: Response): Promise<void> {
   const body = req.body;
   const user = await UserModel.findOne({ email: body.email });
 
   if (!user) {
-    return res.status(400).json({
+    res.status(400).json({
       error: "Email or password incorrect !",
     });
+    return;
   } else {
     let password: string = user.password || "";
 
-    if (!password)
-      return res.status(400).json({
+    if (!password) {
+      res.status(400).json({
         error: "Email or password incorrect !",
       });
+      return;
+    }
 
     const isValidPassword = bcrypt.compareSync(body.password, password);
 
     if (!isValidPassword) {
-      return res.status(400).json({
+      res.status(400).json({
         error: "Email or password incorrect !",
       });
     } else {
@@ -99,7 +106,8 @@ async function signIn(req: Request, res: Response): Promise<any> {
       const refreshTokenSecret: string = process.env.REFRESH_TOKEN_SECRET || "";
 
       if (!accessTokenSecret || !refreshTokenSecret) {
-        return res.status(500).json({ error: "Server configuration error." });
+        res.status(500).json({ error: "Server configuration error." });
+        return;
       }
 
       let accessToken = jwt.sign(payload, accessTokenSecret, {
@@ -113,7 +121,7 @@ async function signIn(req: Request, res: Response): Promise<any> {
         token: refreshToken,
       });
 
-      return res.status(200).json({
+      res.status(200).json({
         data: {
           accessToken,
           refreshToken,
@@ -124,28 +132,32 @@ async function signIn(req: Request, res: Response): Promise<any> {
 }
 
 // [POST] /auth/refresh-token
-async function refreshToken(req: Request, res: Response): Promise<any> {
+async function refreshToken(req: Request, res: Response): Promise<void> {
   const token: string | undefined = req.body.refreshToken;
   if (!token) {
-    return res.status(400).json({ error: "Missing refresh token" });
+    res.status(400).json({ error: "Missing refresh token" });
+    return;
   }
 
   let tokenModel = await TokenModel.findOne({ token });
   if (!tokenModel) {
-    return res.status(401).json({
+    res.status(401).json({
       error: "UnAuthorized",
     });
+    return;
   }
 
   let refreshTokenSecret: string = process.env.REFRESH_TOKEN_SECRET || "";
   if (!refreshTokenSecret) {
-    return res.status(500).json({ error: "Missing refresh token secret" });
+    res.status(500).json({ error: "Missing refresh token secret" });
+    return;
   }
 
   let decoded = jwt.verify(token, refreshTokenSecret) as jwt.JwtPayload;
   if (!decoded) {
     await TokenModel.deleteOne({ token });
-    return res.status(401).json({ error: "Unauthorized" });
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
 
   const payload = {
@@ -156,14 +168,15 @@ async function refreshToken(req: Request, res: Response): Promise<any> {
   const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "15m";
   const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
   if (!accessTokenSecret) {
-    return res.status(500).json({ error: "Missing access token secret" });
+    res.status(500).json({ error: "Missing access token secret" });
+    return;
   }
 
   let accessToken = jwt.sign(payload, accessTokenSecret, {
     expiresIn: accessTokenLife,
   });
 
-  return res.status(200).json({
+  res.status(200).json({
     data: {
       accessToken,
       refreshToken: token,

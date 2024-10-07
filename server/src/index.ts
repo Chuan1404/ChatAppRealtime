@@ -3,6 +3,9 @@ import cors from "cors"
 import dotenv from "dotenv"
 import http from "http"
 import bodyParser from "body-parser"
+import router from "./routes"
+import database from "./configs/database"
+import socket from "./configs/socket"
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -16,15 +19,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("publics"));
 
 // config
-import database from "./configs/database"
-import socket from "./configs/socket"
-
 dotenv.config();
 database.connect()
 socket.init(server)
 
 // routes
-import router from "./routes"
 router(app);
 
 server.listen(PORT, () => {
