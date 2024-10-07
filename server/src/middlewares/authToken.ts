@@ -34,6 +34,7 @@ function authToken(req: Request, res: Response, next: NextFunction): void {
   }
 
   req.userId = decoded.id;
+  console.log(req.userId)
   next();
 }
 

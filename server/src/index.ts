@@ -7,6 +7,14 @@ import router from "./routes"
 import database from "./configs/database"
 import socket from "./configs/socket"
 
+declare global {
+  namespace Express {
+    export interface Request {
+      userId?: string;
+    }
+  }
+}
+
 const app: Application = express();
 const server = http.createServer(app);
 

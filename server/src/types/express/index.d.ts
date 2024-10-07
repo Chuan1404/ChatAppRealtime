@@ -1,5 +1,7 @@
-declare namespace Express {
-  interface Request {
-    userId?: string; // Adjust the type as necessary (e.g., string, number)
+declare global {
+  namespace Express {
+    export interface Request {
+      userId?: string;
+    }
   }
 }

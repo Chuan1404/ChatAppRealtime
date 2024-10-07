@@ -1,6 +1,6 @@
 import express from "express"
 import userController from "../controllers/UserController"
-import authToken from "../utils/authToken"
+import authToken from "../middlewares/authToken"
 
 const router = express.Router()
 

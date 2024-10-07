@@ -3,10 +3,12 @@ import UserModel from "../models/UserModel";
 import TokenModel from "../models/TokenModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { UserCreateDTO, UserLoginDTO } from "../dtos/UserDTO";
+import { TokenRefreshDTO } from "../dtos/TokenDTO";
 
 // [POST] /auth/register
 async function signUp(req: Request, res: Response): Promise<void> {
-  const body = req.body;
+  const body = req.body as UserCreateDTO;
 
   if (req.file) {
     body.avatar = "images/" + req.file.filename;
@@ -70,7 +72,7 @@ async function signUp(req: Request, res: Response): Promise<void> {
 
 // [POST] /auth/sign-in
 async function signIn(req: Request, res: Response): Promise<void> {
-  const body = req.body;
+  const body = req.body as UserLoginDTO;
   const user = await UserModel.findOne({ email: body.email });
 
   if (!user) {
@@ -79,16 +81,17 @@ async function signIn(req: Request, res: Response): Promise<void> {
     });
     return;
   } else {
-    let password: string = user.password || "";
-
-    if (!password) {
+    if (!user.password || !body.password) {
       res.status(400).json({
         error: "Email or password incorrect !",
       });
       return;
     }
 
-    const isValidPassword = bcrypt.compareSync(body.password, password);
+    const isValidPassword = bcrypt.compareSync(
+      body.password,
+      user.password as string
+    );
 
     if (!isValidPassword) {
       res.status(400).json({
@@ -133,7 +136,7 @@ async function signIn(req: Request, res: Response): Promise<void> {
 
 // [POST] /auth/refresh-token
 async function refreshToken(req: Request, res: Response): Promise<void> {
-  const token: string | undefined = req.body.refreshToken;
+  const { refreshToken: token } = req.body as TokenRefreshDTO;
   if (!token) {
     res.status(400).json({ error: "Missing refresh token" });
     return;

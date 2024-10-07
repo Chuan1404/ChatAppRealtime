@@ -1,7 +1,7 @@
 import express from "express"
 import chatController from "../controllers/ChatController";
 import upload from "../configs/multer";
-import authToken from "../utils/authToken";
+import authToken from "../middlewares/authToken";
 
 const router = express.Router();
 
