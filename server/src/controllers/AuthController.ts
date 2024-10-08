@@ -156,35 +156,36 @@ async function refreshToken(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  let decoded = jwt.verify(token, refreshTokenSecret) as jwt.JwtPayload;
-  if (!decoded) {
+  try {
+    let decoded = jwt.verify(token, refreshTokenSecret) as jwt.JwtPayload;
+
+    const payload = {
+      id: decoded.id,
+      email: decoded.email,
+    };
+
+    const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "15m";
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
+    if (!accessTokenSecret) {
+      res.status(500).json({ error: "Missing access token secret" });
+      return;
+    }
+
+    let accessToken = jwt.sign(payload, accessTokenSecret, {
+      expiresIn: accessTokenLife,
+    });
+
+    res.status(200).json({
+      data: {
+        accessToken,
+        refreshToken: token,
+      },
+    });
+  } catch (err) {
     await TokenModel.deleteOne({ token });
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
-
-  const payload = {
-    id: decoded.id,
-    email: decoded.email,
-  };
-
-  const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "15m";
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
-  if (!accessTokenSecret) {
-    res.status(500).json({ error: "Missing access token secret" });
-    return;
-  }
-
-  let accessToken = jwt.sign(payload, accessTokenSecret, {
-    expiresIn: accessTokenLife,
-  });
-
-  res.status(200).json({
-    data: {
-      accessToken,
-      refreshToken: token,
-    },
-  });
 }
 
 export default {

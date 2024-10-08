@@ -26,16 +26,13 @@ function authToken(req: Request, res: Response, next: NextFunction): void {
     return;
   }
 
-  let decoded = jwt.verify(token, accessTokenSecret) as jwt.JwtPayload;
-
-  if (!decoded) {
+  try {
+    let decoded = jwt.verify(token, accessTokenSecret) as jwt.JwtPayload;
+    req.userId = decoded.id;
+    next();
+  } catch (err) {
     res.status(401).json({ error: "Unauthorized" });
-    return;
   }
-
-  req.userId = decoded.id;
-  console.log(req.userId)
-  next();
 }
 
 export default authToken;

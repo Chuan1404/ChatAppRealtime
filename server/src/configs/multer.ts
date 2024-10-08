@@ -1,11 +1,10 @@
 import { Request } from "express";
-
-const multer = require("multer");
-const path = require("path");
+import multer from "multer";
+import path from "path";
 
 const storage = multer.diskStorage({
   destination: (req: Request, file: Express.Multer.File, cb: any) => {
-    cb(null, path.join(__dirname, "../public/images"));
+    cb(null, path.join(__dirname, "../publics/images"));
   },
   filename: (req: Request, file: Express.Multer.File, cb: any) => {
     const name = Date.now().toString() + "_" + file.originalname;

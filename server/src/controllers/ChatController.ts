@@ -65,7 +65,7 @@ class ChatController {
         });
       } else {
         res.status(404).json({
-          message: "No rooms found for the user.",
+          error: "No rooms found for the user.",
         });
       }
     } catch (error) {

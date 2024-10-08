@@ -6,6 +6,7 @@ import bodyParser from "body-parser"
 import router from "./routes"
 import database from "./configs/database"
 import socket from "./configs/socket"
+import path from "path"
 
 declare global {
   namespace Express {
@@ -24,7 +25,7 @@ const PORT = 3001;
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("publics"));
+app.use(express.static(path.join(__dirname, 'publics')));
 
 // config
 dotenv.config();
