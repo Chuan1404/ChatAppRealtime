@@ -20,12 +20,12 @@ class UserController {
             const id = req.userId;
             const user = yield UserModel_1.default.findOne({ _id: id });
             if (!user) {
-                return res.status(400).json({
+                res.status(400).json({
                     error: "User doesn't exist",
                 });
             }
             else {
-                return res.status(200).json({
+                res.status(200).json({
                     data: user,
                 });
             }
@@ -37,14 +37,16 @@ class UserController {
             const id = req.userId;
             const users = yield UserModel_1.default.find({ _id: { $ne: id } });
             if (!users) {
-                return res.status(400).json({
+                res.status(400).json({
                     error: "User doesn't exist",
                 });
+                return;
             }
             else {
-                return res.status(200).json({
+                res.status(200).json({
                     data: users,
                 });
+                return;
             }
         });
     }

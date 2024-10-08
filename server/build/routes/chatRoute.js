@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const ChatController_1 = __importDefault(require("../controllers/ChatController"));
 const multer_1 = __importDefault(require("../configs/multer"));
-const authToken_1 = __importDefault(require("../utils/authToken"));
+const authToken_1 = __importDefault(require("../middlewares/authToken"));
 const router = express_1.default.Router();
 router.use(authToken_1.default);
 router.get("/get-room", ChatController_1.default.getRoom);

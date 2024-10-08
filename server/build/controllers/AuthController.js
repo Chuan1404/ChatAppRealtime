@@ -25,9 +25,10 @@ function signUp(req, res) {
         }
         const existedUser = yield UserModel_1.default.findOne({ email: body.email });
         if (existedUser) {
-            return res.status(409).json({
+            res.status(409).json({
                 error: "Account already exists",
             });
+            return;
         }
         else {
             const hashPassword = bcrypt_1.default.hashSync(body.password, 10);
@@ -35,10 +36,11 @@ function signUp(req, res) {
             model.password = hashPassword;
             let savedUser = yield model.save();
             if (!savedUser) {
-                return res.status(400).json({
+                res.status(400).json({
                     status: 400,
                     error: "Create user fail!",
                 });
+                return;
             }
             const payload = {
                 id: savedUser._id,
@@ -49,7 +51,8 @@ function signUp(req, res) {
             const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
             const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || "";
             if (!accessTokenSecret || !refreshTokenSecret) {
-                return res.status(500).json({ error: "Server configuration error." });
+                res.status(500).json({ error: "Server configuration error." });
+                return;
             }
             let accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, {
                 expiresIn: accessTokenLife,
@@ -60,12 +63,13 @@ function signUp(req, res) {
             TokenModel_1.default.create({
                 token: refreshToken,
             });
-            return res.status(200).json({
+            res.status(200).json({
                 data: {
                     accessToken,
                     refreshToken,
                 },
             });
+            return;
         }
     });
 }
@@ -75,19 +79,21 @@ function signIn(req, res) {
         const body = req.body;
         const user = yield UserModel_1.default.findOne({ email: body.email });
         if (!user) {
-            return res.status(400).json({
+            res.status(400).json({
                 error: "Email or password incorrect !",
             });
+            return;
         }
         else {
-            let password = user.password || "";
-            if (!password)
-                return res.status(400).json({
+            if (!user.password || !body.password) {
+                res.status(400).json({
                     error: "Email or password incorrect !",
                 });
-            const isValidPassword = bcrypt_1.default.compareSync(body.password, password);
+                return;
+            }
+            const isValidPassword = bcrypt_1.default.compareSync(body.password, user.password);
             if (!isValidPassword) {
-                return res.status(400).json({
+                res.status(400).json({
                     error: "Email or password incorrect !",
                 });
             }
@@ -101,7 +107,8 @@ function signIn(req, res) {
                 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
                 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || "";
                 if (!accessTokenSecret || !refreshTokenSecret) {
-                    return res.status(500).json({ error: "Server configuration error." });
+                    res.status(500).json({ error: "Server configuration error." });
+                    return;
                 }
                 let accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, {
                     expiresIn: accessTokenLife,
@@ -112,7 +119,7 @@ function signIn(req, res) {
                 TokenModel_1.default.create({
                     token: refreshToken,
                 });
-                return res.status(200).json({
+                res.status(200).json({
                     data: {
                         accessToken,
                         refreshToken,
@@ -125,43 +132,50 @@ function signIn(req, res) {
 // [POST] /auth/refresh-token
 function refreshToken(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = req.body.refreshToken;
+        const { refreshToken: token } = req.body;
         if (!token) {
-            return res.status(400).json({ error: "Missing refresh token" });
+            res.status(400).json({ error: "Missing refresh token" });
+            return;
         }
         let tokenModel = yield TokenModel_1.default.findOne({ token });
         if (!tokenModel) {
-            return res.status(401).json({
+            res.status(401).json({
                 error: "UnAuthorized",
             });
+            return;
         }
         let refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || "";
         if (!refreshTokenSecret) {
-            return res.status(500).json({ error: "Missing refresh token secret" });
+            res.status(500).json({ error: "Missing refresh token secret" });
+            return;
         }
-        let decoded = jsonwebtoken_1.default.verify(token, refreshTokenSecret);
-        if (!decoded) {
+        try {
+            let decoded = jsonwebtoken_1.default.verify(token, refreshTokenSecret);
+            const payload = {
+                id: decoded.id,
+                email: decoded.email,
+            };
+            const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "15m";
+            const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
+            if (!accessTokenSecret) {
+                res.status(500).json({ error: "Missing access token secret" });
+                return;
+            }
+            let accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, {
+                expiresIn: accessTokenLife,
+            });
+            res.status(200).json({
+                data: {
+                    accessToken,
+                    refreshToken: token,
+                },
+            });
+        }
+        catch (err) {
             yield TokenModel_1.default.deleteOne({ token });
-            return res.status(401).json({ error: "Unauthorized" });
+            res.status(401).json({ error: "Unauthorized" });
+            return;
         }
-        const payload = {
-            id: decoded.id,
-            email: decoded.email,
-        };
-        const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "15m";
-        const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
-        if (!accessTokenSecret) {
-            return res.status(500).json({ error: "Missing access token secret" });
-        }
-        let accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, {
-            expiresIn: accessTokenLife,
-        });
-        return res.status(200).json({
-            data: {
-                accessToken,
-                refreshToken: token,
-            },
-        });
     });
 }
 exports.default = {

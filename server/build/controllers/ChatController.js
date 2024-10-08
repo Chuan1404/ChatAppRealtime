@@ -32,19 +32,19 @@ class ChatController {
                 if (!room) {
                     room = yield ChatRoomModel_1.default.create(body);
                 }
-                return res.status(200).json({
+                res.status(200).json({
                     data: room,
                 });
             }
             // room among many people
             else if (body.type == constants_1.ROOM_TYPE.GROUP) {
                 let room = yield ChatRoomModel_1.default.create(body);
-                return res.status(200).json({
+                res.status(200).json({
                     data: room,
                 });
             }
             else {
-                return res.status(400).json({
+                res.status(400).json({
                     error: "Something error !",
                 });
             }
@@ -56,27 +56,28 @@ class ChatController {
             try {
                 const userId = req.userId;
                 if (!userId) {
-                    return res.status(400).json({
+                    res.status(400).json({
                         error: "User ID is missing.",
                     });
+                    return;
                 }
                 const rooms = yield ChatRoomModel_1.default.find({
                     members: { $all: [userId] },
                 }).populate("members", "_id username"); // Populate only specific fields
                 if (rooms.length > 0) {
-                    return res.status(200).json({
+                    res.status(200).json({
                         data: rooms,
                     });
                 }
                 else {
-                    return res.status(404).json({
-                        message: "No rooms found for the user.",
+                    res.status(404).json({
+                        error: "No rooms found for the user.",
                     });
                 }
             }
             catch (error) {
                 console.error("Error fetching rooms: ", error);
-                return res.status(500).json({
+                res.status(500).json({
                     error: "Internal server error.",
                 });
             }
@@ -88,12 +89,12 @@ class ChatController {
             let messageModel = new ChatMessageModel_1.default(req.body);
             try {
                 let saveResult = yield messageModel.save();
-                return res.status(200).json({
+                res.status(200).json({
                     data: saveResult,
                 });
             }
             catch (err) {
-                return res.status(400).json({
+                res.status(400).json({
                     error: err,
                 });
             }
@@ -105,12 +106,12 @@ class ChatController {
             let chatRoomId = req.params.roomId;
             let chats = yield ChatMessageModel_1.default.find({ chatRoomId }).populate("senderObject");
             if (chats) {
-                return res.status(200).json({
+                res.status(200).json({
                     data: chats,
                 });
             }
             else {
-                return res.status(400).json({
+                res.status(400).json({
                     error: "Something error !",
                 });
             }
