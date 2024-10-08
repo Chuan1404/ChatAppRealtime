@@ -56,20 +56,15 @@ const AddGroupPopup = ({ handleAddRoom = () => {} }) => {
       type: 2,
     };
 
-    if (
-        form.name == "" ||
-        file == null
-      ) {
-        alert("Trường bắt buộc nhập chưa có giá trị");
-        return;
-      }
+    if (form.name == "" || file == null) {
+      alert("Trường bắt buộc nhập chưa có giá trị");
+      return;
+    }
 
-      if (
-        members.length == 0
-      ) {
-        alert("Phải có thành viên trong nhóm");
-        return;
-      }
+    if (members.length == 0) {
+      alert("Phải có thành viên trong nhóm");
+      return;
+    }
 
     for (var key in body) {
       formData.append(key, body[key]);
@@ -80,7 +75,6 @@ const AddGroupPopup = ({ handleAddRoom = () => {} }) => {
     }
 
     let response = await chatService.createRoom(formData);
-
     if (!response.error) {
       setIsOpenPopup(false);
       handleAddRoom(response.data);
@@ -141,7 +135,6 @@ const AddGroupPopup = ({ handleAddRoom = () => {} }) => {
               ></MDBBtn>
             </MDBModalHeader>
 
-            
             <MDBModalBody>
               <MDBValidation className="row g-3">
                 <MDBValidationItem className="col-md-12 mb-2">
@@ -166,53 +159,62 @@ const AddGroupPopup = ({ handleAddRoom = () => {} }) => {
                   ref={fileInput}
                 />
               </MDBValidationItem>
+              <MDBModalTitle style={{ margin: "10px 0" }}>
+                Thêm thành viên vào phòng
+              </MDBModalTitle>
 
-              {isFetching
-                ? "...loading"
-                : userList?.map((user, index) => (
-                    <label
-                      key={index}
+              {isFetching ? (
+                "...loading"
+              ) : userList && userList.length > 0 ? (
+                userList.map((user, index) => (
+                  <label
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      paddingBottom: 10,
+                    }}
+                  >
+                    <MDBCheckbox
+                      name="userList"
+                      value={user._id}
+                      id={user._id}
+                      onChange={handleChange}
+                    />
+                    <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        paddingBottom: 10,
+                        marginLeft: 10,
                       }}
                     >
-                      <MDBCheckbox
-                        name="userList"
-                        value={user._id}
-                        id={user._id}
-                        onChange={handleChange}
+                      <img
+                        src={user ? `${API}/${user.avatar}` : ""}
+                        alt="avatar"
+                        className="rounded-circle d-flex align-self-center me-3 shadow-1-strong"
+                        width="60"
+                        height="60"
                       />
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginLeft: 10,
-                        }}
-                      >
-                        <img
-                          src={user ? `${API}/${user.avatar}` : ""}
-                          alt="avatar"
-                          className="rounded-circle d-flex align-self-center me-3 shadow-1-strong"
-                          width="60"
-                          height="60"
-                        />
-                        <div className="pt-1">
-                          <p className="fw-bold mb-0">
-                            {user ? user.name : ""}
-                          </p>
-                        </div>
+                      <div className="pt-1">
+                        <p className="fw-bold mb-0">{user ? user.name : ""}</p>
                       </div>
-                    </label>
-                  ))}
+                    </div>
+                  </label>
+                ))
+              ) : (
+                <>
+                  <span>Chưa có người dùng</span>
+                </>
+              )}
             </MDBModalBody>
 
             <MDBModalFooter>
               <MDBBtn color="secondary" onClick={toggleOpen}>
                 Đóng
               </MDBBtn>
-              <MDBBtn type="submit" onClick={handleSubmit}>Xác nhận</MDBBtn>
+              <MDBBtn type="submit" onClick={handleSubmit}>
+                Xác nhận
+              </MDBBtn>
             </MDBModalFooter>
           </MDBModalContent>
         </MDBModalDialog>

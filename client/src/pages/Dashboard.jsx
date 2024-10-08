@@ -63,6 +63,7 @@ export default function Dashboard() {
   };
 
   const handleAddRoom = (room) => {
+    console.log(room)
     setRoomList([...roomList, room]);
   };
 
